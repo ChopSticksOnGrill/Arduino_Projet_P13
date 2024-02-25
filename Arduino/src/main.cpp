@@ -9,7 +9,7 @@
 
 /*------------------------------ Constantes ---------------------------------*/
 
-#define BAUD 9600        // Frequence de transmission serielle
+#define BAUD 200000        // Frequence de transmission serielle
 
 /*---------------------------- Variables globales ---------------------------*/
 
@@ -102,11 +102,6 @@ void setup() {
 
 /* Boucle principale (infinie) */
 void loop() {
-
-  if(shouldRead_){
-    readMsg();
-    sendMsg();
-  }
 
   potValue = analogRead(A0);
   //Serial.println(potValue);          // debug
@@ -227,10 +222,6 @@ void loop() {
   }
 
   // Boutons
-  Serial.println(digitalRead(pinBUTTON1));
-  Serial.println(digitalRead(pinBUTTON2));
-  Serial.println(digitalRead(pinBUTTON3));
-  Serial.println(digitalRead(pinBUTTON4));
 
   if(!digitalRead(pinBUTTON1)){
     digitalWrite(pinDEL1, HIGH);
@@ -259,7 +250,11 @@ void loop() {
   else{ 
     digitalWrite(pinDEL4, LOW);
   }
-  delay(50);  // delais de 10 ms
+
+  if(shouldRead_){
+    readMsg();
+    sendMsg();
+  }
 }
 
 /*---------------------------Definition de fonctions ------------------------*/
@@ -277,7 +272,14 @@ void sendMsg() {
   StaticJsonDocument<500> doc;
   // Elements du message
   doc["time"] = millis();
-  doc["analog"] = potValue;
+  doc["pot"] = analogRead(A0);
+  doc["bouton1"] = digitalRead(pinBUTTON1);
+  doc["bouton2"] = digitalRead(pinBUTTON2);
+  doc["bouton3"] = digitalRead(pinBUTTON3);
+  doc["bouton4"] = digitalRead(pinBUTTON4);
+  doc["AccX"] = analogRead(A1);
+  doc["AccY"] = analogRead(A2);
+  doc["AccZ"] = analogRead(A3);
 
   // Serialisation
   serializeJson(doc, Serial);
