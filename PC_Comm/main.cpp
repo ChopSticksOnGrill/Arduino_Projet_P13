@@ -15,7 +15,7 @@ using namespace std;
 using json = nlohmann::json;
 
 /*------------------------------ Constantes ---------------------------------*/
-#define BAUD 200000           // Frequence de transmission serielle
+#define BAUD 116200           // Frequence de transmission serielle
 #define MSG_MAX_SIZE 1024   // Longueur maximale d'un message
 
 

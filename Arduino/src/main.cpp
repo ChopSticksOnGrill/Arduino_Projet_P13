@@ -9,7 +9,7 @@
 
 /*------------------------------ Constantes ---------------------------------*/
 
-#define BAUD 200000        // Frequence de transmission serielle
+#define BAUD 9600        // Frequence de transmission serielle
 
 /*---------------------------- Variables globales ---------------------------*/
 
@@ -20,36 +20,48 @@ int ledState = 0;
 int potValue = 0;
 
 // Pin potentiomatte
-// DIFF: A0
+#define pinPOT A9
 
 // Pins bargraph
-#define pinBAR1 3
-#define pinBAR2 4
-#define pinBAR3 5
-#define pinBAR4 6
-#define pinBAR5 7
-#define pinBAR6 8
-#define pinBAR7 9
-#define pinBAR8 10
-#define pinBAR9 11
-#define pinBAR10 12
+#define pinBAR1 12
+#define pinBAR2 11
+#define pinBAR3 10
+#define pinBAR4 9
+#define pinBAR5 8
+#define pinBAR6 7
+#define pinBAR7 6
+#define pinBAR8 5
+#define pinBAR9 4
+#define pinBAR10 3
 
 // Pins DELs
-#define pinDEL1 22
-#define pinDEL2 24
-#define pinDEL3 26
-#define pinDEL4 28
+#define pinDEL1 51
+#define pinDEL2 49
+#define pinDEL3 47
+#define pinDEL4 45
 
 // Pins Acceleromatte
-// X: A1 Y: A2 Z: A3
+#define pinACCX A15
+#define pinACCY A14
+#define pinACCZ A13
+#define pinACCST A12
+
+// Pins Joystick
+#define pinJOYX A11
+#define pinJOYY A10
+#define pinJOYCLICK 53
+
+// Pins moteur et vibrateur
+#define pinMOTEUR 13
+#define pinSPEAKER 37
 
 // Pins Boutons/Gachettes
-#define pinBUTTON1 23
-#define pinBUTTON2 25
-#define pinBUTTON3 27
-#define pinBUTTON4 29
-#define pinGACHETTE1 31
-#define pinGACHETTE2 33
+#define pinBUTTON1 29
+#define pinBUTTON2 31
+#define pinBUTTON3 35
+#define pinBUTTON4 33
+#define pinGACHETTE1 23
+#define pinGACHETTE2 25
 
 /*------------------------- Prototypes de fonctions -------------------------*/
 void sendMsg(); 
@@ -79,9 +91,12 @@ void setup() {
   pinMode(pinDEL4, OUTPUT);
 
   // Pins Acceleromatte
-  pinMode(A1, INPUT); // X
-  pinMode(A2, INPUT); // Y
-  pinMode(A3, INPUT); // Z
+  pinMode(pinACCX, INPUT); 
+  pinMode(pinACCY, INPUT); 
+  pinMode(pinACCZ, INPUT); 
+
+  // Pins Speaker et Moteur
+  pinMode(pinMOTEUR, OUTPUT);
 
   // Pins Boutons
   pinMode(pinBUTTON1, INPUT);
@@ -98,37 +113,43 @@ void setup() {
   pinMode(pinGACHETTE2, INPUT);
   digitalWrite(pinGACHETTE1, HIGH);
   digitalWrite(pinGACHETTE2, HIGH);
+
+  // Pins Joystick
+  pinMode(pinJOYX, INPUT);
+  pinMode(pinJOYY, INPUT);
+  pinMode(pinJOYCLICK, INPUT);
 }
 
-/* Boucle principale (infinie) */
-void loop() {
+double i = 0;
 
-  potValue = analogRead(A0);
-  //Serial.println(potValue);          // debug
-  
+/* Boucle principale (infinie) */
+void loop() { 
+
   // Acceleromatte
-  int accX = analogRead(A1);
-  int accY = analogRead(A2);
-  int accZ = analogRead(A3);
+  int accX = analogRead(pinACCX);
+  int accY = analogRead(pinACCY);
+  int accZ = analogRead(pinACCZ);
 
   //Serial.println(accX);
   //Serial.println(accY);
   //Serial.println(accZ);
 
-  // Bar Graph
-  digitalWrite(pinBAR1, HIGH);
-  digitalWrite(pinBAR2, HIGH);
-  digitalWrite(pinBAR3, HIGH);
-  digitalWrite(pinBAR4, HIGH);
-  digitalWrite(pinBAR5, HIGH);
-  digitalWrite(pinBAR6, HIGH);
-  digitalWrite(pinBAR7, HIGH);
-  digitalWrite(pinBAR8, HIGH);
-  digitalWrite(pinBAR9, HIGH);
-  digitalWrite(pinBAR10, HIGH);
+  // JoyStick
+  //Serial.println(analogRead(pinJOYX));
+  //Serial.println(analogRead(pinJOYY));
+  //Serial.println(digitalRead(pinJOYCLICK));
 
-  //Serial.println(analogRead(A0));
-  switch (map(potValue, 500, 1000, 0, 10))
+  // Moteur
+  //digitalWrite(pinMOTEUR, HIGH); // P2
+  //digitalWrite(pinSPEAKER, HIGH); // P1
+
+  i += 0.001;
+  Serial.println(sin(i)* 1023);
+  analogWrite(pinMOTEUR, sin(i)* 1023);
+
+  // Bar Graph
+  //Serial.println(analogRead(pinPOT));  //Debug
+  switch (map(analogRead(pinPOT), 0, 1000, 0, 10))
   {
   case 0:
     digitalWrite(pinBAR1, HIGH);
@@ -144,21 +165,51 @@ void loop() {
     break;
   case 1:
     digitalWrite(pinBAR1, LOW);
+    digitalWrite(pinBAR2, HIGH);
+    digitalWrite(pinBAR3, HIGH);
+    digitalWrite(pinBAR4, HIGH);
+    digitalWrite(pinBAR5, HIGH);
+    digitalWrite(pinBAR6, HIGH);
+    digitalWrite(pinBAR7, HIGH);
+    digitalWrite(pinBAR8, HIGH);
+    digitalWrite(pinBAR9, HIGH);
+    digitalWrite(pinBAR10, HIGH);
     break;
   case 2:
     digitalWrite(pinBAR1, LOW);
     digitalWrite(pinBAR2, LOW);
+    digitalWrite(pinBAR3, HIGH);
+    digitalWrite(pinBAR4, HIGH);
+    digitalWrite(pinBAR5, HIGH);
+    digitalWrite(pinBAR6, HIGH);
+    digitalWrite(pinBAR7, HIGH);
+    digitalWrite(pinBAR8, HIGH);
+    digitalWrite(pinBAR9, HIGH);
+    digitalWrite(pinBAR10, HIGH);
     break;
   case 3:
     digitalWrite(pinBAR1, LOW);
     digitalWrite(pinBAR2, LOW);
     digitalWrite(pinBAR3, LOW);
+    digitalWrite(pinBAR4, HIGH);
+    digitalWrite(pinBAR5, HIGH);
+    digitalWrite(pinBAR6, HIGH);
+    digitalWrite(pinBAR7, HIGH);
+    digitalWrite(pinBAR8, HIGH);
+    digitalWrite(pinBAR9, HIGH);
+    digitalWrite(pinBAR10, HIGH);
     break; 
   case 4:
     digitalWrite(pinBAR1, LOW);
     digitalWrite(pinBAR2, LOW);
     digitalWrite(pinBAR3, LOW);
     digitalWrite(pinBAR4, LOW);
+    digitalWrite(pinBAR5, HIGH);
+    digitalWrite(pinBAR6, HIGH);
+    digitalWrite(pinBAR7, HIGH);
+    digitalWrite(pinBAR8, HIGH);
+    digitalWrite(pinBAR9, HIGH);
+    digitalWrite(pinBAR10, HIGH);
     break;
   case 5:
     digitalWrite(pinBAR1, LOW);
@@ -166,6 +217,11 @@ void loop() {
     digitalWrite(pinBAR3, LOW);
     digitalWrite(pinBAR4, LOW);
     digitalWrite(pinBAR5, LOW);
+    digitalWrite(pinBAR6, HIGH);
+    digitalWrite(pinBAR7, HIGH);
+    digitalWrite(pinBAR8, HIGH);
+    digitalWrite(pinBAR9, HIGH);
+    digitalWrite(pinBAR10, HIGH);
     break; 
   case 6:
     digitalWrite(pinBAR1, LOW);
@@ -174,6 +230,10 @@ void loop() {
     digitalWrite(pinBAR4, LOW);
     digitalWrite(pinBAR5, LOW);
     digitalWrite(pinBAR6, LOW);
+    digitalWrite(pinBAR7, HIGH);
+    digitalWrite(pinBAR8, HIGH);
+    digitalWrite(pinBAR9, HIGH);
+    digitalWrite(pinBAR10, HIGH);
     break; 
   case 7:
     digitalWrite(pinBAR1, LOW);
@@ -183,6 +243,9 @@ void loop() {
     digitalWrite(pinBAR5, LOW);
     digitalWrite(pinBAR6, LOW);
     digitalWrite(pinBAR7, LOW);
+    digitalWrite(pinBAR8, HIGH);
+    digitalWrite(pinBAR9, HIGH);
+    digitalWrite(pinBAR10, HIGH);
     break; 
   case 8:
     digitalWrite(pinBAR1, LOW);
@@ -193,6 +256,8 @@ void loop() {
     digitalWrite(pinBAR6, LOW);
     digitalWrite(pinBAR7, LOW);
     digitalWrite(pinBAR8, LOW);
+    digitalWrite(pinBAR9, HIGH);
+    digitalWrite(pinBAR10, HIGH);
     break; 
   case 9:
     digitalWrite(pinBAR1, LOW);
@@ -204,6 +269,7 @@ void loop() {
     digitalWrite(pinBAR7, LOW);
     digitalWrite(pinBAR8, LOW);
     digitalWrite(pinBAR9, LOW);
+    digitalWrite(pinBAR10, HIGH);
     break;   
   case 10:
     digitalWrite(pinBAR1, LOW);
@@ -224,31 +290,31 @@ void loop() {
   // Boutons
 
   if(!digitalRead(pinBUTTON1)){
-    digitalWrite(pinDEL1, HIGH);
+    digitalWrite(pinDEL3, LOW);
   }
   else {
-    digitalWrite(pinDEL1, LOW);
+    digitalWrite(pinDEL3, HIGH);
   }
 
   if(!digitalRead(pinBUTTON2)){
-    digitalWrite(pinDEL2, HIGH);
+    digitalWrite(pinDEL2, LOW);
   }
   else{ 
-    digitalWrite(pinDEL2, LOW);
+    digitalWrite(pinDEL2, HIGH);
   }
 
   if(!digitalRead(pinBUTTON3)){
-    digitalWrite(pinDEL3, HIGH);
+    digitalWrite(pinDEL1, LOW);
   }
   else{ 
-    digitalWrite(pinDEL3, LOW);
+    digitalWrite(pinDEL1, HIGH);
   }
   
   if(!digitalRead(pinBUTTON4)){
-    digitalWrite(pinDEL4, HIGH);
+    digitalWrite(pinDEL4, LOW);
   }
   else{ 
-    digitalWrite(pinDEL4, LOW);
+    digitalWrite(pinDEL4, HIGH);
   }
 
   if(shouldRead_){
