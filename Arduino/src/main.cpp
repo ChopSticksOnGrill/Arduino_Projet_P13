@@ -288,7 +288,7 @@ void loop() {
   }
 
   // Boutons
-
+  // Si le bouton est appuye alors on allume sa DEL
   if(!digitalRead(pinBUTTON1)){
     digitalWrite(pinDEL3, LOW);
   }
