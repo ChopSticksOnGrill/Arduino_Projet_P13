@@ -6,10 +6,11 @@
 /*------------------------------ Librairies ---------------------------------*/
 #include <Arduino.h>
 #include <ArduinoJson.h>
-
+#include <LiquidCrystal.h>
+#include <Wire.h>
 /*------------------------------ Constantes ---------------------------------*/
 
-#define BAUD 9600        // Frequence de transmission serielle
+#define BAUD 115200        // Frequence de transmission serielle
 
 /*---------------------------- Variables globales ---------------------------*/
 
@@ -18,7 +19,17 @@ volatile bool shouldRead_ = false;  // Drapeau prêt à lire un message
 
 int ledState = 0;
 int potValue = 0;
-
+//LiquidCrystal
+  /*Circuit:
+ * OLED RS pin to digital pin 22
+ * OLED Enable pin to digital pin 24
+ * OLED D4 pin to digital pin 26
+ * OLED D5 pin to digital pin 28
+ * OLED D6 pin to digital pin 30
+ * OLED D7 pin to digital pin 32
+ * OLED R/W pin to ground
+ */
+LiquidCrystal lcd(22,24,26,28,30,32);
 // Pin potentiomatte
 #define pinPOT A9
 
@@ -71,7 +82,6 @@ void serialEvent();
 
 void setup() {
   Serial.begin(BAUD);               // Initialisation de la communication serielle
-
   // Pins BarGraph
   pinMode(pinBAR1, OUTPUT); // BARGRAPH 1
   pinMode(pinBAR2, OUTPUT);
@@ -118,17 +128,31 @@ void setup() {
   pinMode(pinJOYX, INPUT);
   pinMode(pinJOYY, INPUT);
   pinMode(pinJOYCLICK, INPUT);
+  //Démarage LCD
+  lcd.begin(16, 2);
+  delay(100);
 }
 
 double i = 0;
 
 /* Boucle principale (infinie) */
 void loop() { 
-
+  lcd.setCursor(0,0);
+  lcd.print("Pot value:");
+  lcd.print(analogRead(pinPOT));
+  lcd.setCursor(0,1);
+  lcd.print("A:");
+  lcd.print(digitalRead(pinBUTTON3));
+  lcd.print(" B:");
+  lcd.print(digitalRead(pinBUTTON4));
+  lcd.print(" Y:");
+  lcd.print(digitalRead(pinBUTTON1));
+  lcd.print(" X:");
+  lcd.print(digitalRead(pinBUTTON2));
+  delay(3);
+  lcd.clear();
   // Acceleromatte
-  int accX = analogRead(pinACCX);
-  int accY = analogRead(pinACCY);
-  int accZ = analogRead(pinACCZ);
+
 
   //Serial.println(accX);
   //Serial.println(accY);
@@ -143,9 +167,9 @@ void loop() {
   //digitalWrite(pinMOTEUR, HIGH); // P2
   //digitalWrite(pinSPEAKER, HIGH); // P1
 
-  i += 0.001;
+  /*i += 0.001;
   Serial.println(sin(i)* 1023);
-  analogWrite(pinMOTEUR, sin(i)* 1023);
+  analogWrite(pinMOTEUR, sin(i)* 1023);*/
 
   // Bar Graph
   //Serial.println(analogRead(pinPOT));  //Debug
@@ -343,10 +367,15 @@ void sendMsg() {
   doc["bouton2"] = digitalRead(pinBUTTON2);
   doc["bouton3"] = digitalRead(pinBUTTON3);
   doc["bouton4"] = digitalRead(pinBUTTON4);
-  doc["AccX"] = analogRead(A1);
-  doc["AccY"] = analogRead(A2);
-  doc["AccZ"] = analogRead(A3);
-
+  
+  doc["AccX"] = analogRead(pinACCX);
+  doc["AccY"] = analogRead(pinACCY);
+  doc["AccZ"] = analogRead(pinACCZ);
+  doc["JoyX"] = analogRead(pinJOYX);
+  doc["JoyY"] = analogRead(pinJOYY);
+  doc["JoyBouton"] = digitalRead(pinJOYCLICK);
+  doc["Gachette1"] = digitalRead(pinGACHETTE1);
+  doc["Gachette2"] = digitalRead(pinGACHETTE2);
   // Serialisation
   serializeJson(doc, Serial);
 
