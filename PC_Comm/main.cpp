@@ -15,8 +15,8 @@ using namespace std;
 using json = nlohmann::json;
 
 /*------------------------------ Constantes ---------------------------------*/
-#define BAUD 116200           // Frequence de transmission serielle
-#define MSG_MAX_SIZE 1024   // Longueur maximale d'un message
+#define BAUD 115200           // Frequence de transmission serielle
+#define MSG_MAX_SIZE 2048   // Longueur maximale d'un message
 
 
 /*------------------------- Prototypes de fonctions -------------------------*/
@@ -33,8 +33,6 @@ int main(){
 
     // Initialisation du port de communication
     string com;
-    cout << "Entrer le port de communication du Arduino: ";
-    //cin >> com;
     arduino = new SerialPort("\\\\.\\COM3", BAUD);
     
     //const char com = "\\\\.\\COM3";

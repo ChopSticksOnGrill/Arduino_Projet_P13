@@ -78,6 +78,7 @@ LiquidCrystal lcd(22,24,26,28,30,32);
 void sendMsg(); 
 void readMsg();
 void serialEvent();
+bool isShakingMaBite();
 /*---------------------------- Fonctions "Main" -----------------------------*/
 
 void setup() {
@@ -151,13 +152,12 @@ void loop() {
   lcd.print(digitalRead(pinBUTTON2));
   delay(3);
   lcd.clear();
-  // Acceleromatte
 
+  // Acceleromatte
 
   //Serial.println(accX);
   //Serial.println(accY);
   //Serial.println(accZ);
-
   // JoyStick
   //Serial.println(analogRead(pinJOYX));
   //Serial.println(analogRead(pinJOYY));
@@ -345,6 +345,7 @@ void loop() {
     readMsg();
     sendMsg();
   }
+  sendMsg();
 }
 
 /*---------------------------Definition de fonctions ------------------------*/
@@ -376,6 +377,7 @@ void sendMsg() {
   doc["JoyBouton"] = digitalRead(pinJOYCLICK);
   doc["Gachette1"] = digitalRead(pinGACHETTE1);
   doc["Gachette2"] = digitalRead(pinGACHETTE2);
+  doc["shake"] = isShakingMaBite();
   // Serialisation
   serializeJson(doc, Serial);
 
@@ -412,4 +414,17 @@ void readMsg(){
     // mettre la led a la valeur doc["led"]
     digitalWrite(pinDEL1,doc["led"].as<bool>());
   }
+}
+
+bool isShakingMaBite(){
+  float mag = sqrt((analogRead(pinACCX)^2) + (analogRead(pinACCY)^2) + (analogRead(pinACCZ)^2));
+  Serial.println(mag);
+  bool shakeState = false;
+  if(mag > 34 || mag < 29){
+    shakeState = true;
+  }
+  else{
+    shakeState = false;
+  }
+  return shakeState;
 }
