@@ -78,7 +78,7 @@ LiquidCrystal lcd(22,24,26,28,30,32);
 void sendMsg(); 
 void readMsg();
 void serialEvent();
-bool isShakingMaBite();
+int isShakingMaBite();
 /*---------------------------- Fonctions "Main" -----------------------------*/
 
 void setup() {
@@ -345,7 +345,6 @@ void loop() {
     readMsg();
     sendMsg();
   }
-  sendMsg();
 }
 
 /*---------------------------Definition de fonctions ------------------------*/
@@ -416,15 +415,15 @@ void readMsg(){
   }
 }
 
-bool isShakingMaBite(){
+int isShakingMaBite(){
   float mag = sqrt((analogRead(pinACCX)^2) + (analogRead(pinACCY)^2) + (analogRead(pinACCZ)^2));
-  Serial.println(mag);
-  bool shakeState = false;
+  // Serial.println(mag);
+  int shakeState = 0;
   if(mag > 34 || mag < 29){
-    shakeState = true;
+    shakeState = 1;
   }
   else{
-    shakeState = false;
+    shakeState = 0;
   }
   return shakeState;
 }
