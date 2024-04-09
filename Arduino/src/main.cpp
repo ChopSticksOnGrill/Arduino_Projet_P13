@@ -8,6 +8,7 @@
 #include <ArduinoJson.h>
 #include <LiquidCrystal.h>
 #include <Wire.h>
+#include <TimerOne.h>
 /*------------------------------ Constantes ---------------------------------*/
 
 #define BAUD 115200        // Frequence de transmission serielle
@@ -19,6 +20,9 @@ volatile bool shouldRead_ = false;  // Drapeau prêt à lire un message
 
 int ledState = 0;
 int potValue = 0;
+
+unsigned long tempsDernierMuouns = 0;
+unsigned long tempsMuons = 0;
 //LiquidCrystal
   /*Circuit:
  * OLED RS pin to digital pin 22
@@ -74,15 +78,28 @@ LiquidCrystal lcd(22,24,26,28,30,32);
 #define pinGACHETTE1 23
 #define pinGACHETTE2 25
 
+//Pin muons
+#define pinMuons A8
+
 /*------------------------- Prototypes de fonctions -------------------------*/
 void sendMsg(); 
 void readMsg();
 void serialEvent();
 int isShakingMaBite();
+void lireMuons();
 /*---------------------------- Fonctions "Main" -----------------------------*/
 
 void setup() {
   Serial.begin(BAUD);               // Initialisation de la communication serielle
+  //Setup des interrupts pour lire muons
+  Timer1.initialize(100); //Initialize timer with 10 millisecond period
+  Timer1.attachInterrupt(lireMuons);
+  
+    // Change le prescaler pour pouvoir faire 20kHz
+    ADMUX |= (1 << REFS0);                                //Met la ref au ground
+    ADCSRA &= (0 << ADPS2) & (0 << ADPS1) & (0 << ADPS0); //Met le prescaler a 0
+    ADCSRA |= (1 << ADEN) | (1 << ADPS2) | (0 << ADPS1) | (1 << ADPS0); //Met le prescaler a 32
+    pinMode(pinMuons,INPUT);
   // Pins BarGraph
   pinMode(pinBAR1, OUTPUT); // BARGRAPH 1
   pinMode(pinBAR2, OUTPUT);
@@ -173,7 +190,8 @@ void loop() {
 
   // Bar Graph
   //Serial.println(analogRead(pinPOT));  //Debug
-  switch (map(analogRead(pinPOT), 0, 1000, 0, 10))
+  
+  switch (map(analogRead(pinPOT), 0, 990, 0, 10))
   {
   case 0:
     digitalWrite(pinBAR1, HIGH);
@@ -362,7 +380,7 @@ void sendMsg() {
   StaticJsonDocument<500> doc;
   // Elements du message
   doc["time"] = millis();
-  doc["pot"] = analogRead(A0);
+  doc["pot"] = analogRead(pinPOT);
   doc["bouton1"] = digitalRead(pinBUTTON1);
   doc["bouton2"] = digitalRead(pinBUTTON2);
   doc["bouton3"] = digitalRead(pinBUTTON3);
@@ -377,6 +395,8 @@ void sendMsg() {
   doc["Gachette1"] = digitalRead(pinGACHETTE1);
   doc["Gachette2"] = digitalRead(pinGACHETTE2);
   doc["shake"] = isShakingMaBite();
+  randomSeed(tempsMuons);
+  doc["random"] = random(0,10);
   // Serialisation
   serializeJson(doc, Serial);
 
@@ -426,4 +446,12 @@ int isShakingMaBite(){
     shakeState = 0;
   }
   return shakeState;
+}
+
+void lireMuons(){
+  if(analogRead(pinMuons) > 800){
+    unsigned long temps = millis();
+    tempsMuons = temps - tempsDernierMuouns;
+    tempsDernierMuouns = temps;
+  }
 }
