@@ -170,28 +170,8 @@ void loop() {
   delay(3);
   lcd.clear();
 
-  // Acceleromatte
-
-  //Serial.println(accX);
-  //Serial.println(accY);
-  //Serial.println(accZ);
-  // JoyStick
-  //Serial.println(analogRead(pinJOYX));
-  //Serial.println(analogRead(pinJOYY));
-  //Serial.println(digitalRead(pinJOYCLICK));
-
-  // Moteur
-  //digitalWrite(pinMOTEUR, HIGH); // P2
-  //digitalWrite(pinSPEAKER, HIGH); // P1
-
-  /*i += 0.001;
-  Serial.println(sin(i)* 1023);
-  analogWrite(pinMOTEUR, sin(i)* 1023);*/
-
-  // Bar Graph
-  //Serial.println(analogRead(pinPOT));  //Debug
-  
-  switch (map(analogRead(pinPOT), 0, 990, 0, 10))
+  potValue = analogRead(pinPOT);
+  switch (map(potValue, 0, 980, 0, 10))
   {
   case 0:
     digitalWrite(pinBAR1, HIGH);
@@ -362,6 +342,7 @@ void loop() {
   if(shouldRead_){
     readMsg();
     sendMsg();
+    delayMicroseconds(1000);
   }
 }
 
@@ -380,7 +361,7 @@ void sendMsg() {
   StaticJsonDocument<500> doc;
   // Elements du message
   doc["time"] = millis();
-  doc["pot"] = analogRead(pinPOT);
+  doc["pot"] = potValue;
   doc["bouton1"] = digitalRead(pinBUTTON1);
   doc["bouton2"] = digitalRead(pinBUTTON2);
   doc["bouton3"] = digitalRead(pinBUTTON3);
