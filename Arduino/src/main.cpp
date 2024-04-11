@@ -23,6 +23,9 @@ int potValue = 0;
 
 unsigned long tempsDernierMuouns = 0;
 unsigned long tempsMuons = 0;
+
+int array[3000];
+int h = 0;
 //LiquidCrystal
   /*Circuit:
  * OLED RS pin to digital pin 22
@@ -92,11 +95,11 @@ void lireMuons();
 void setup() {
   Serial.begin(BAUD);               // Initialisation de la communication serielle
   //Setup des interrupts pour lire muons
-  Timer1.initialize(100); //Initialize timer with 10 millisecond period
+  Timer1.initialize(50); //Initialize timer with 10 millisecond period
   Timer1.attachInterrupt(lireMuons);
   
     // Change le prescaler pour pouvoir faire 20kHz
-    ADMUX |= (1 << REFS0);                                //Met la ref au ground
+    ADMUX |= (1 << REFS0);                                //Met la ref du adc au ground(sinon bugs)
     ADCSRA &= (0 << ADPS2) & (0 << ADPS1) & (0 << ADPS0); //Met le prescaler a 0
     ADCSRA |= (1 << ADEN) | (1 << ADPS2) | (0 << ADPS1) | (1 << ADPS0); //Met le prescaler a 32
     pinMode(pinMuons,INPUT);
@@ -155,7 +158,7 @@ double i = 0;
 
 /* Boucle principale (infinie) */
 void loop() { 
-  lcd.setCursor(0,0);
+  /*lcd.setCursor(0,0);
   lcd.print("Pot value:");
   lcd.print(analogRead(pinPOT));
   lcd.setCursor(0,1);
@@ -168,7 +171,7 @@ void loop() {
   lcd.print(" X:");
   lcd.print(digitalRead(pinBUTTON2));
   delay(3);
-  lcd.clear();
+  lcd.clear();*/
 
   potValue = analogRead(pinPOT);
   switch (map(potValue, 0, 980, 0, 10))
@@ -344,6 +347,20 @@ void loop() {
     sendMsg();
     delayMicroseconds(1000);
   }
+  
+  if (h >= 3000 && h>0){
+      for(int f =0;f<20;f++){
+    Serial.print("Data:");
+    Serial.print(array[f]);
+    Serial.print(",");
+    Serial.print("b:");
+    Serial.print(300);
+    Serial.print(",");
+    Serial.print("o:");
+    Serial.println(700);
+      }
+      h = -1;
+  }
 }
 
 /*---------------------------Definition de fonctions ------------------------*/
@@ -384,6 +401,15 @@ void sendMsg() {
   // Envoie
   Serial.println();
   shouldSend_ = false;
+  
+  /*Serial.print("Data:");
+  Serial.print(analogRead(pinMuons));
+  Serial.print(",");
+  Serial.print("b:");
+  Serial.print(300);
+  Serial.print(",");
+  Serial.print("o:");
+  Serial.println(700);*/
 }
 
 /*---------------------------Definition de fonctions ------------------------
@@ -430,9 +456,13 @@ int isShakingMaBite(){
 }
 
 void lireMuons(){
-  if(analogRead(pinMuons) > 800){
-    unsigned long temps = millis();
-    tempsMuons = temps - tempsDernierMuouns;
-    tempsDernierMuouns = temps;
+  if(h<3000 && h>=0){
+    array[h] = analogRead(pinMuons);
+    if(array[h] > 800){
+      unsigned long temps = millis();
+      tempsMuons = temps - tempsDernierMuouns;
+      tempsDernierMuouns = temps;
+    }
+    h++;
   }
 }
